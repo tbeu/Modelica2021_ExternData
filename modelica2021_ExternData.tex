@@ -40,7 +40,6 @@
   pdfcreator = pdflatex,
   pdfproducer = pdflatex}
 
-
 \lstset{language = c,
        % basicstyle=\fontsize{9pt}{10.5pt}\selectfont,
        basicstyle=\fontsize{9pt}{10.5pt}\ttfamily,
@@ -86,7 +85,7 @@ The topic was raised again for the MSL (Modelica Standard Library)\footnote{MA p
 
 When the MA project SSP (System Structure and Parameterization of Components for Virtual System Design)\footnote{MA project ``System Structure and Parameterization'', \url{https://ssp-standard.org}} was initiated in 2014, only the parameterization of networks of FMUs (Functional Mock-up Units)\footnote{MA project ``Functional Mock-up Interface'', \url{https://fmi-standard.org}} was considered. Even though the SSP standard 1.0 misses support for array parameters, it was not yet contemplated to apply it as layered standard for the parameterization of Modelica models.
 
-With no standardized interface available, Modelica users depending on external data resources either still need to write their own utility libraries or have to depend on tool-specific features (e.g., the data base interface of SimulationX\footnote{SimulationX by ESI,
+With no standardized interface available, Modelica users depending on external data resources either still need to write their own utility libraries or have to depend on proprietary, tool-specific features (e.g., the data base interface of SimulationX\footnote{SimulationX by ESI,
 \url{https://www.simulationx.com}}) or commercially available libraries such as \modelica{Modelon.DataAccess} from Modelon\footnote{Modelon, \url{https://www.modelon.com}}.
 
 \medskip
@@ -98,20 +97,27 @@ The parameterization of Modelica models can be differentiated by the following u
  \item Structural parameters have influence on the overall system topology and thus on the dimension of the system of equations. They need to be constant during a transient simulation, but any change requires a new translation of the Modelica model. Special care needs to be taken if structural parameters are read from external data resources.
 \end{itemize}
 
-The Modelica library \modelica{ExternData}\footnote{ExternData Git repository, \url{https://github.com/modelica-3rdparty/ExternData}} supports the user in reading properties or structural parameters from various file types of external data resources.
-The Modelica library \modelica{ModelicaTableAdditions}\footnote{ModelicaTableAdditions Git repository, \url{https://github.com/tbeu/ModelicaTableAdditions}} is an extension of the Modelica Standard Tables~\cite{modelica2014tables} with support for more file types beside Dymola MOS\footnote{There is no specific name or file extension for the Dymola-specific text/script files starting with ``\#1'' as first line.} and MATLAB MAT.
-Its blocks can be utilized to additionally model stimulation parameterization from CSV (Comma Separated Values), EPW (EnergyPlus Weather) or JSON (JavaScript Object Notation) files and work as a replacement of the Modelica Standard Tables of the MSL.
+The Modelica libraries \modelica{ExternData}\footnote{ExternData Git repository, \url{https://github.com/modelica-3rdparty/ExternData}} and \modelica{ModelicaTableAdditions}\footnote{ModelicaTableAdditions Git repository, \url{https://github.com/tbeu/ModelicaTableAdditions}} are available as open-source Modelica packages under the permissive BSD-2-Clause License.
 Both libraries can be directly obtained from GitHub or via the Modelica \modelica{impact} package manager~\cite{Tiller2015WhereIG}.
+\begin{itemize}
+ \item \modelica{ExternData} supports the user in reading properties or structural parameters from various file types of external data resources.
+ Data access from CSV (Comma Separated Values), INI, JSON (JavaScript Object Notation), MATLAB MAT (including HDF), SSV (System Structure Parameter Values), TIR (Tire Properties), Excel XLS/XLSX and XML files is implemented. 
+ \item \modelica{ModelicaTableAdditions} is an extension of the Modelica Standard Tables~\cite{modelica2014tables} with support for more file types beside Dymola MOS\footnote{There is no specific name or file extension for the Dymola-specific text/script files starting with ``\#1'' as first line.} and MATLAB MAT.
+ Its blocks can be utilized to additionally model stimulation parameterization from CSV, EPW (EnergyPlus Weather) or JSON files and work as a replacement of the Modelica Standard Tables of the MSL.
+\end{itemize}
 
-\section{ExternData}
+\section{Best Practice for String Parameters}
 
 \cite{modelisax2018hints}
+
+\section{ExternData}
 
 \section{ModelicaTableAdditions}
 
 \section{Outlook}
 encryption
 units
+xpath
 
 % \subsection{Fonts}
 
