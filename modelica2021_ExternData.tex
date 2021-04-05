@@ -26,6 +26,11 @@
 \addbibresource{modelica2021_ExternData.bib}
 \usepackage[utf8]{inputenc} % utf8 input encoding which should work with pdflatex, but not lualatex
 \usepackage{cleveref}
+% \usepackage[squaren,thinqspace]{SIunits}
+% \usepackage{url}
+\usepackage{relsize}
+% \usepackage{pgfplots}
+% \pdfminorversion=4
 
 \hypersetup{%
   pdftitle  = {Efficient Parameterization of Modelica Models},
@@ -44,6 +49,27 @@
        % basicstyle=\fontsize{9pt}{10.5pt}\selectfont,
        basicstyle=\fontsize{9pt}{10.5pt}\ttfamily,
        backgroundcolor = \color{white}}
+
+%c from texinfo.tex
+\def\ifmonospace{\ifdim\fontdimen3\font=0pt }
+
+%c C plus plus
+\def\C++{%
+\ifmonospace%
+    C++%
+\else%
+    C\kern-.1667em\raise.30ex\hbox{\smaller{++}}%
+\fi%
+\spacefactor1000 }
+
+%c C sharp
+\def\Csharp{%
+\ifmonospace%
+    C\#%
+\else%
+    C\kern-.1667em\raise.30ex\hbox{\smaller{\#}}%
+\fi%
+\spacefactor1000 }
 
 \newcommand{\clang}[1]{\lstinline[language=c]|#1|}
 \newcommand{\modelica}[1]{\lstinline[language=modelica]|#1|}
@@ -101,18 +127,111 @@ The Modelica libraries \modelica{ExternData}\footnote{ExternData Git repository,
 Both libraries can be directly obtained from GitHub or via the Modelica \modelica{impact} package manager~\cite{Tiller2015WhereIG}.
 \begin{itemize}
  \item \modelica{ExternData} supports the user in reading properties or structural parameters from various file types of external data resources.
- Data access from CSV (Comma Separated Values), INI, JSON (JavaScript Object Notation), MATLAB MAT (including HDF), SSV (System Structure Parameter Values), TIR (Tire Properties), Excel XLS/XLSX and XML files is implemented. 
+ Data access from CSV (Comma Separated Values), INI, JSON (JavaScript Object Notation), MATLAB MAT (including HDF), SSV (System Structure Parameter Values), TIR (Tire Properties), Excel XLS/XLSX and XML files is implemented.
  \item \modelica{ModelicaTableAdditions} is an extension of the Modelica Standard Tables~\cite{modelica2014tables} with support for more file types beside Dymola MOS\footnote{There is no specific name or file extension for the Dymola-specific text/script files starting with ``\#1'' as first line.} and MATLAB MAT.
- Its blocks can be utilized to additionally model stimulation parameterization from CSV, EPW (EnergyPlus Weather) or JSON files and work as a replacement of the Modelica Standard Tables of the MSL.
+ Its blocks can be utilized to either model stimulation parameterization or look-up tables from CSV, EPW (EnergyPlus Weather) or JSON files and work as a replacement of the Modelica Standard Tables of the MSL.
 \end{itemize}
-
-\section{Best Practice for String Parameters}
-
-\cite{modelisax2018hints}
 
 \section{ExternData}
 
+The Modelica library \modelica{ExternData} developed out of the need to offer an open-source utility package for efficient parameterization of property parameters from external data resources.
+It is implemented in pure C (i.e., no \C++) by means of external functions and objects serving the Modelica external function interface.
+It has been tested in Dymola and SimulationX, and also works in OpenModelica\footnote{Open Source Modelica Consortium (OSMC),
+\url{https://openmodelica.org/}} with restrictions.
+
+\subsection{Library Design}
+
+The library (as shown in Figure~\ref{fig:ExternData}) consists of top-level (parameter) records for each supported file type (e.g., \modelica{ExternData.XMLFile}), the provided accessor functions in \modelica{ExternData.Functions} and the external objects in \modelica{ExternData.Types}.
+\begin{figure}[!hb]
+\centering
+\includegraphics[scale=0.8]{resources/ExternData.png}
+\caption{Library structure of \modelica{ExternData}}
+\label{fig:ExternData}
+\end{figure}
+
+Whereas the accessor functions and external object types are necessary implementations, the (parameter) records are pure convenience types to encapsulate both the accessor functions and external object component. A naive type definition and exemplary user call in an application model is given in~\autoref{lst:naive-record-type-definition}.
+
+\begin{lstlisting}[caption=Naive record type definition, label=lst:naive-record-type-definition, language=modelica]
+// Library
+record R "Data source record"
+  parameter String fileName = ""
+    "External data resource";
+  final parameter Types.ExtObj obj =
+    Types.ExtObj(fileName) "Ext. object";
+  pure function f "Accessor function"
+    input Types.ExtObj obj "Ext. object";
+    input String s "Accessor";
+    output Real out "Data value";
+    external "C" out = ExtFun(obj, s);
+  end f;
+end R;
+
+// Application model
+parameter R r(fileName="C:/dataFile.ext");
+parameter Real p = r.f(r.obj, s="id");
+\end{lstlisting}
+
+The disadvantage of such a naive approach is that the handle of the external object has to be passed by every call of the accessor functions though it actually is an implementation detail of the record and should be a protected component.
+A more sophisticated library design is based on clean interfaces for the records and accessor functions enabling inheritance, and thus the possibility of function redeclaration~\cite{modelisax2018hints}.
+The general approach is presented in~\autoref{lst:soph-record-type-definition}.
+
+\begin{lstlisting}[caption=Sophisticated record type definition, label=lst:soph-record-type-definition, language=modelica]
+// Library
+package Interfaces "Interfaces"
+  partial record RBase "Base record"
+    replaceable function f =
+      Interfaces.fBase;
+  end RBase;
+  partial function fBase "Base function"
+    input Types.ExtObj obj "Ext. object";
+    input String s "Accessor";
+    output Real out "Data value";
+  end fBase;
+end Interfaces;
+
+package Functions "Functions"
+  pure function f "Accessor function"
+    extends Interface.fBase;
+    external "C" out = ExtFun(obj, s);
+  end f;
+end Functions;
+
+record R "Data source record"
+  parameter String fileName = ""
+    "External data resource";
+  final parameter Types.ExtObj obj =
+    Types.ExtObj(fileName) "Ext. object";
+  extends Interfaces.RBase(
+    redeclare final function f =
+      Functions.f(obj=obj)
+      "Accessor function");
+end R;
+
+// Application model
+parameter R r(fileName="C:/dataFile.ext");
+parameter Real p = r.f(s="id");
+\end{lstlisting}
+
+With such a sophisticated library design the actual implementation (as external object) is disguised from the caller. The handle of the external object no longer needs to be passed by the member accessor functions and hence could be made a protected component. It has been successfully tested in Dymola and SimulationX, but fails in OpenModelica with a ``cyclic dependency'' error\footnote{ExternData issue \#9, \url{https://github.com/modelica-3rdparty/ExternData/issues/9}}. Thus, the (parameter) record types cannot be used with OpenModelica.
+Only the external objects and their accessor functions are available for OpenModelica.
+
+\subsection{Supported File Types}
+
 \section{ModelicaTableAdditions}
+
+\subsection{Library Design}
+
+\subsection{Supported File Types}
+
+\begin{figure}[!hb]
+\centering
+\includegraphics[scale=0.8]{resources/ModelicaTableAdditions.png}
+\caption{Library structure of \modelica{ModelicaTableAdditions}}
+\label{fig:ModelicaTableAdditions}
+\end{figure}
+
+\section{Best Practice for String Parameters}
+
 
 \section{Outlook}
 encryption
