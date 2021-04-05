@@ -129,7 +129,7 @@ Both libraries can be directly obtained from GitHub or via the Modelica \modelic
  \item \modelica{ExternData} supports the user in reading properties or structural parameters from various file types of external data resources.
  Data access from CSV (Comma Separated Values), INI, JSON (JavaScript Object Notation), MATLAB MAT (including HDF), SSV (System Structure Parameter Values), TIR (Tire Properties), Excel XLS/XLSX and XML files is implemented.
  \item \modelica{ModelicaTableAdditions} is an extension of the Modelica Standard Tables~\cite{modelica2014tables} with support for more file types beside Dymola MOS\footnote{There is no specific name or file extension for the Dymola-specific text/script files starting with ``\#1'' as first line.} and MATLAB MAT.
- Its blocks can be utilized to either model stimulation parameterization or look-up tables from CSV, EPW (EnergyPlus Weather) or JSON files and work as a replacement of the Modelica Standard Tables of the MSL.
+ Its blocks can be utilized to also model stimulation parameterization or look-up tables from CSV, EPW (EnergyPlus Weather) or JSON files and work as a replacement of the Modelica Standard Tables of the MSL.
 \end{itemize}
 
 \section{ExternData}
@@ -173,7 +173,7 @@ parameter Real p = r.f(r.obj, s="id");
 
 The disadvantage of such a naive approach is that the handle of the external object has to be passed by every call of the accessor functions though it actually is an implementation detail of the record and should be a protected component.
 A more sophisticated library design is based on clean interfaces for the records and accessor functions enabling inheritance, and thus the possibility of function redeclaration~\cite{modelisax2018hints}.
-The general approach is presented in~\autoref{lst:soph-record-type-definition}.
+The general concept is presented in~\autoref{lst:soph-record-type-definition}.
 
 \begin{lstlisting}[caption=Sophisticated record type definition, label=lst:soph-record-type-definition, language=modelica]
 // Library
@@ -212,16 +212,26 @@ parameter R r(fileName="C:/dataFile.ext");
 parameter Real p = r.f(s="id");
 \end{lstlisting}
 
-With such a sophisticated library design the actual implementation (as external object) is disguised from the caller. The handle of the external object no longer needs to be passed by the member accessor functions and hence could be made a protected component. It has been successfully tested in Dymola and SimulationX, but fails in OpenModelica with a ``cyclic dependency'' error\footnote{ExternData issue \#9, \url{https://github.com/modelica-3rdparty/ExternData/issues/9}}. Thus, the (parameter) record types cannot be used with OpenModelica.
+With such a sophisticated library design the actual implementation (as external object) is disguised from the caller as the handle of the external object no longer needs to be passed by the member accessor functions, and hence could be made a protected component.
+It has been successfully tested in Dymola and SimulationX, but fails in OpenModelica with a ``cyclic dependency'' error\footnote{ExternData issue \#9, \url{https://github.com/modelica-3rdparty/ExternData/issues/9}}.
+Thus, the (parameter) record types cannot be used with OpenModelica.
 Only the external objects and their accessor functions are available for OpenModelica.
 
 \subsection{Supported File Types}
 
 \section{ModelicaTableAdditions}
 
+The Modelica library \modelica{ModelicaTableAdditions} developed out of the need to offer reading of external data sources for look-up tables from a commonly used text file format.
+The Dymola MOS file format, which is the only text file format supported by the Modelica Standard Tables is not suitable for exchange between different applications.
+This is where CSV and JSON have their advantages, which can easily be processed by different applications.
+As with the Modelica Standard Tables, the external functions are implemented in pure C (i.e., no \C++).
+For JSON, the same library dependencies are utilized as with \modelica{ExternData}.
+It is possible to use components of packages \modelica{ExternData}, \modelica{ModelicaTableAdditions} and MSL in the same application model.
+The library has been tested in Dymola and OpenModelica.
+
 \subsection{Library Design}
 
-\subsection{Supported File Types}
+The library (as shown in Figure~\ref{fig:ModelicaTableAdditions}) consists of the five combi table blocks known from the MSL, but this time within the \modelica{ModelicaTableAdditions} namespace.
 
 \begin{figure}[!hb]
 \centering
@@ -229,6 +239,8 @@ Only the external objects and their accessor functions are available for OpenMod
 \caption{Library structure of \modelica{ModelicaTableAdditions}}
 \label{fig:ModelicaTableAdditions}
 \end{figure}
+
+\subsection{Supported File Types}
 
 \section{Best Practice for String Parameters}
 
