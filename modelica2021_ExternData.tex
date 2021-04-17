@@ -99,8 +99,8 @@ The Modelica libraries \modelica{ExternData} and \modelica{ModelicaTableAddition
 
 The separation of the design parameters from Modelica application models was already discussed within the MA (Modelica Association)\footnote{Modelica Association, \url{https://modelica.org}} about 15 years ago.
 \textcite{modelica2005Ford} developed an in-house library \modelica{DataRetrieval}, that featured a generic approach applicable for different file formats or data bases.
-Supported file formats included for example XML (Extensible Markup Language), HDF (Hierarchical Data Format) and MATLAB MAT.
-There even have been early ideas for the standardization of the appropriate interfaces and XPath-like query expressions.
+Supported file formats included for example XML (eXtensible Markup Language), HDF (Hierarchical Data Format) and MATLAB MAT.
+There even have been early ideas for the standardization of the appropriate interfaces and XPath query expressions.
 Similarly, \textcite{modelica2005ZF} presented an in-house library \modelica{ZFlib} based on simple ASCII text files for a generic parameterization of transmission models.
 This library was later extended by \textcite{modelica2006ZF} to also support target platforms without a file system.
 \textcite{Reisenbichler2006IfWO} bewailed that the XML technology had not yet established as a standardized concept for the parameterization of Modelica application models.
@@ -129,19 +129,18 @@ Both libraries can be directly obtained from GitHub or via the Modelica \modelic
  \item \modelica{ExternData} supports the user in reading properties or structural parameters from various file types of external data resources.
  Data access from CSV (Comma Separated Values), INI, JSON (JavaScript Object Notation), MATLAB MAT (including HDF), SSV (System Structure Parameter Values), TIR (Tire Properties), Excel XLS/XLSX and XML files is implemented.
  \item \modelica{ModelicaTableAdditions} is an extension of the Modelica Standard Tables~\cite{modelica2014tables} with support for more file types beside Dymola MOS\footnote{There is no specific name or file extension for the Dymola-specific text/script files starting with ``\#1'' as first line.} and MATLAB MAT.
- Its blocks can be utilized to also model stimulation parameterization or look-up tables from CSV, EPW (EnergyPlus Weather) or JSON files and work as a replacement of the Modelica Standard Tables of the MSL.
+ Its blocks can be utilized to also model stimulation parameterization or look-up tables from CSV, EPW (EnergyPlus Weather)\footnote{EnergyPlus Weather Data, \url{https://energyplus.net/weather}} or JSON files and work as a replacement of the Modelica Standard Tables of the MSL.
 \end{itemize}
 
 \section{ExternData}
 
 The Modelica library \modelica{ExternData} developed out of the need to offer an open-source utility package for efficient parameterization of property parameters from external data resources.
-It is implemented in pure C (i.e., no \C++) by means of external functions and objects serving the Modelica external function interface.
-It has been tested in Dymola and SimulationX, and also works in OpenModelica\footnote{Open Source Modelica Consortium (OSMC),
-\url{https://openmodelica.org/}} with restrictions.
+It has been successfully tested in Dymola, OpenModelica\footnote{Open Source Modelica Consortium (OSMC),
+\url{https://openmodelica.org/}} (Linux only) and SimulationX.
 
 \subsection{Library Design}
 
-The library (as shown in Figure~\ref{fig:ExternData}) consists of top-level (parameter) records for each supported file type, the provided accessor functions in \modelica{ExternData.Functions} and the external objects in \modelica{ExternData.Types}.
+The library (as shown in Figure~\ref{fig:ExternData}) consists of top-level data source records for each supported file type, the provided accessor functions in \modelica{ExternData.Functions} and the external objects in \modelica{ExternData.Types}.
 \begin{figure}[!hb]
 \centering
 \includegraphics[scale=0.8]{resources/ExternData.png}
@@ -149,7 +148,9 @@ The library (as shown in Figure~\ref{fig:ExternData}) consists of top-level (par
 \label{fig:ExternData}
 \end{figure}
 
-Whereas the accessor functions and external object types are necessary implementations, the (parameter) records are pure convenience types to encapsulate both the accessor functions and external object component. A naive type definition and exemplary user call in an application model is given in~\autoref{lst:naive-record-type-definition}.
+\subsubsection{Data Source Records}
+
+The data source records are convenience types to encapsulate the external object component with its accessor functions.
 
 \begin{lstlisting}[caption=Naive record type definition, label=lst:naive-record-type-definition, language=modelica]
 // Library
@@ -173,7 +174,10 @@ parameter Real p = dataSource.f(
   dataSource.obj, "id");
 \end{lstlisting}
 
-The disadvantage of such a naive approach is that the handle of the external object has to be passed by every call of the accessor functions though it actually is an implementation detail of the record and should be a protected component.
+A naive record type definition together with an exemplary user call (application model) is given in~\autoref{lst:naive-record-type-definition}.
+(For the sake of clarity, the declaration of the external type \modelica{Types.ExtObj} and the external function annotation for \modelica{ExtFun} are skipped.)
+
+The disadvantage of such a naive approach is that the handle of the external object, i.e. \modelica{dataSource.obj}, has to be passed by every call of the accessor functions though it actually is an implementation detail of the record and should be a protected component.
 A more sophisticated library design is based on clean interfaces for the records and accessor functions enabling inheritance, and thus the possibility of function redeclaration~\cite{modelisax2018hints}.
 The general concept is presented in~\autoref{lst:soph-record-type-definition}.
 
@@ -215,11 +219,76 @@ parameter Real p = dataSource.f("id");
 \end{lstlisting}
 
 With such a sophisticated library design the actual implementation (as external object) is disguised from the caller as the handle of the external object no longer needs to be passed by the member accessor functions, and hence could be made a protected component.
-It has been successfully tested in Dymola and SimulationX, but fails in OpenModelica with a ``cyclic dependency'' error\footnote{ExternData issue \#9, \url{https://github.com/modelica-3rdparty/ExternData/issues/9}}.
-Thus, the (parameter) record types cannot be used with OpenModelica.
-Only the external objects and their accessor functions (of \modelica{ExternData.Functions}) are directly supported in OpenModelica.
+
+However, as of MLS 3.5 (Modelica Language Specification), it is not yet fully specified, if external objects may be used in records\footnote{MLS issue \#2399, \url{https://github.com/modelica/ModelicaSpecification/issues/2399}}.
+
+\subsubsection{External Functions}\label{sec:functions}
+
+The actual external functions and objects serving the Modelica external function interface are implemented in C, i.e. no \C++ is utilized.
+
+Independent of the actual file type, the accessor functions for Real, Integer, Boolean or String scalars are \modelica{getReal}, \modelica{getInteger}, \modelica{getBoolean} or \modelica{getString}, respectively.
+For one/two-dimensional arrays, the accessor functions are appended by \modelica{Array1D}/\modelica{Array2D}, e.g., \modelica{getRealArray1D} or \modelica{getIntegerArray2D}.
+There also are the corresponding functions to retrieve the array dimensions from the external data resource, i.e., \modelica{getArraySize1D} and \modelica{getArraySize2D} (and also \modelica{getArrayRows2D} and \modelica{getArrayColumns2D}).
+
+\subsubsection{Structural Parameters}
+
+Reading structural parameters using the \modelica{getArraySize1D}/\modelica{getArraySize2D} functions from external data resources (as shown for an XML file by~\autoref{lst:struct-params}) is not generally supported\footnote{MLS issue \#2425, \url{https://github.com/modelica/ModelicaSpecification/issues/2425}}.
+Of the tested Modelica tools, it only works in SimulationX.
+
+\begin{lstlisting}[caption=Accessing structural parameters in SimulationX, label=lst:struct-params, language=modelica]
+// SimulationX application model
+parameter String s = "vector"
+  "XML element name";
+parameter ExternData.XMLFile dataSource(
+  fileName="dataSource.xml")
+  "Data source record";
+parameter Integer m =
+  dataSource.getArraySize1D(s)
+  "Structural parameter";
+parameter Real p[:] =
+  dataSource.getRealArray1D(s, m)
+  "Array parameter";
+\end{lstlisting}
+
+To assist the Dymola users, alternative implementations using \modelica{readArraySize1D}/\modelica{readArraySize2D} functions are available.
+This comes with the disadvantage of redundant file I/O and is demonstrated by~\autoref{lst:struct-params-alt}.
+
+\begin{lstlisting}[caption=Accessing structural parameters in Dymola, label=lst:struct-params-alt, language=modelica]
+// Dymola application model
+parameter String s = "vector"
+  "XML element name";
+parameter XMLFile dataSource(
+  fileName="dataSource.xml")
+  "Data source record";
+parameter Integer m =
+  ExternData.XMLFile.Functions.
+    readArraySize1D(
+    varName=s,
+    fileName="dataSource.xml")
+  "Structural parameter";
+parameter Real p[:] =
+  dataSource.getRealArray1D(s, m)
+  "Array parameter";
+\end{lstlisting}
+
+\subsubsection{Missing Data}
+
+In some cases it may happen, that data of the external resources is missing, for example, an empty cell of an Excel file.
+By parameter \modelica{detectMissingData}, \modelica{ExternData} supports four options how to deal with missing data values.
+
+\begin{itemize}
+ \item Return data-type specific defaults
+ \item Return data-type specific defaults and print a message
+ \item Return data-type specific defaults and raise a warning
+ \item Stop the simulation with an error message
+\end{itemize}
+
+Similarly, the accessor functions~(Section \ref{sec:functions}) also return a Boolean output \modelica{exist} to indicate if the retrieved data is available or missing.
+This way, the reaction on missing data can be modeled per function call.
 
 \subsection{Supported File Types}
+
+\modelica{ExternData} supports various file types for different kind of requirements.
 
 \subsubsection*{CSV}
 
@@ -274,18 +343,15 @@ MATLAB MAT of version~7.3 are HDF5 files and can be considered as a dedicated HD
 \subsubsection*{SSV}
 
 SSV files are standardized XML files that are used within the context of SSP to connect and parameterize FMUs.
-One SSV file describes exactly one parameter set where only scalar parameter values are supported.
-\autoref{lst:ssv-example} displays an example SSV file of version~1.0.
+They can not only be used to parameterize imported FMUs in the Modelica simulation environment.
+One SSV file describes exactly one parameter set where (as of version~1.0) only scalar parameter values are supported.
+\autoref{lst:ssv-example} displays an example SSV file.
 
 \begin{lstlisting}[caption=Example SSV file, label=lst:ssv-example]
 <?xml version="1.0" encoding="UTF-8"?>
-<ssv:ParameterSet version="1.0" name="Data set"
-  xmlns:ssv="http://ssp-standard.org/SSP1/
-    SystemStructureParameterValues"
-  xmlns:ssc="http://ssp-standard.org/SSP1/
-    SystemStructureCommon"
-  xmlns:xsi="http://www.w3.org/2001/
-    XMLSchema-instance">
+<ssv:ParameterSet version="1.0" name="Data
+  set" xmlns:ssv="http://ssp-standard.org/
+  SSP1/SystemStructureParameterValues">
   <ssv:Parameters>
     <ssv:Parameter name="gain.k">
       <ssv:Real value="2"/>
@@ -294,10 +360,12 @@ One SSV file describes exactly one parameter set where only scalar parameter val
 </ssv:ParameterSet>
 \end{lstlisting}
 
+Technically, the external object \modelica{ExternData.Types.ExternXML2File} is reused while the SSV accessor functions call the appropriate XML2 functions (\modelica{ExternData.Functions.XML2.*}) with dedicated XPath query expressions.
+
 \subsubsection*{TIR}
 
 TIR files define domain-specific tire properties.
-They are similar to INI files and are implemented to share the same external object \modelica{ExternData.Types.ExternINIFile}.
+They are similar to INI files and are implemented to share the same external object \modelica{ExternData.Types.ExternINIFile} with respective format permissions.
 
 \subsubsection*{Excel XLS/XLSX}
 
@@ -305,12 +373,13 @@ Both legacy XLS and Office Open XML based XLSX Excel files are supported for par
 
 \subsubsection*{XML}
 
+There are two implementations available.
+\begin{enumerate}
+ \item \modelica{ExternData.XMLFile} is a straightforward implementation to return values from XML element nodes
+ \item \modelica{ExternData.XML2File} enables full support of XPath query expressions to also query XML attributes or more complicated XML structures.
+\end{enumerate}
 
-
-\subsection{Missing Data}
-
-
-\subsection{Structural Parameters}
+There is no restriction on the underlying XML schema, i.e. it can be used for arbitrarily structured XML data, being standardized (e.g., SSV or CPACS (Common Parametric Aircraft Configuration Schema)\footnote{CPACS, \url{https://cpacs.de}}) or not.
 
 \section{ModelicaTableAdditions}
 
@@ -320,11 +389,11 @@ This is where CSV and JSON have their advantages, which can easily be processed 
 As with the Modelica Standard Tables, the external functions are implemented in pure C (i.e., no \C++).
 For JSON, the same library dependencies are utilized as with \modelica{ExternData}.
 It is possible to use components of packages \modelica{ExternData}, \modelica{ModelicaTableAdditions} and MSL in the same application model.
-The library has been tested in Dymola and OpenModelica.
+The library has been successfully tested in Dymola and OpenModelica (Linux only).
 
 \subsection{Library Design}
 
-The library (as shown in Figure~\ref{fig:ModelicaTableAdditions}) consists of the five combi-table blocks known from the MSL, but this time within the \modelica{ModelicaTableAdditions} namespace.
+The library (as shown in Figure~\ref{fig:ModelicaTableAdditions}) consists of the five combi-table blocks known from the MSL, but this time within the \modelica{ModelicaTableAdditions} name-space.
 
 \begin{figure}[!ht]
 \centering
@@ -343,7 +412,7 @@ Both the number of header lines and the column delimiter character can be specif
 \subsubsection{EPW}
 
 The weather conditions of one year are the typical stimulation parameters for building energy simulations, such as the Modelica \modelica{Buildings} Library~\cite{buildings}.
-EnergyPlus\footnote{EnergyPlus Weather Data, \url{https://energyplus.net/weather}} provides weather data for simulation in various formats, especially their EPW format.
+EnergyPlus provides weather data for simulation in various formats, especially their EPW format.
 Since this file format is not natively supported by the Modelica Standard Tables it manually needed to be pre-processed and converted to either Dymola~MOS or MATLAB MAT format.
 This pre-processing no longer is necessary as the EPW format is directly supported by all blocks of the \modelica{ModelicaTableAdditions} library.
 
@@ -351,15 +420,24 @@ This pre-processing no longer is necessary as the EPW format is directly support
 
 Similar as with CSV, tables can be read from JSON files and be utilized as stimulation parameters, e.g. parameter ``matrix'' of~\autoref{lst:json-example}.
 
-\section{Outlook}
-encryption
-units
-xpath
-xlsx
+\section{Conclusions and Outlook}
+
+The open-source libraries \modelica{ExternData} and \modelica{ModelicaTableAdditions} are an offer to Modelica library developers and users to efficiently parameterize Modelica application models.
+Its right to exist is due a missing layered (Modelica Association) standard for the parameterization of Modelica models.
+As already mentioned by~\modelica{DataRetrieval}, the benefits of such a standardization are the cutback of library code towards the Modelica tools to even further increase the efficiency, convenience and usability.
+
+There is no support for units so far, i.e., unit conversion is left to the application.
+This could be also addressed by a standardized parameterization.
+
+Library-wise, one future idea is the support of (symmetrical of asymmetrical) encrypted external resources, which is not yet covered by the MLS.
+In such cases the external functions need the appropriate (private) key to decrypt the external resources at simulation time in memory.
+Again, encryption as an isolated application can only be considered a short-term solution towards a future standard.
+
+Furthermore, it might be desirable if the mentioned open issues on the Modelica Language Specification regarding external objects could be clarified finally.
 
 \section*{Acknowledgements}
 
-The authors would like to thank everybody who has contributed to the libraries \modelica{ExternData} and \modelica{ModelicaTableAdditions}, particularly, Hany Yu, Martin Sjölund, Mike Dempsey and Peter Harman.
+The authors would like to thank everybody who has contributed to the libraries \modelica{ExternData} and \modelica{ModelicaTableAdditions}, particularly, Hang Yu, Martin Sjölund, Mike Dempsey and Peter Harman.
 
 \printbibliography
 
