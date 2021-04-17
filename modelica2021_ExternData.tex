@@ -105,7 +105,7 @@ Similarly, \textcite{modelica2005ZF} presented an in-house library \modelica{ZFl
 This library was later extended by \textcite{modelica2006ZF} to also support target platforms without a file system.
 \textcite{Reisenbichler2006IfWO} bewailed that the XML technology had not yet established as a standardized concept for the parameterization of Modelica application models.
 They again proposed to use XML as file format for external data resources -- being a standardized and widely accepted language with significant tool support for data processing.
-Their Dymola\footnote{Dassault Systèmes, \url{https://www.3ds.com}} XML library also featured the full power of the XPath query expressions and data processing capabilities.
+Their Dymola\footnote{Dassault Systèmes, \url{https://www.3ds.com}} library also featured the full power of the XPath query expressions and data processing capabilities.
 
 The topic was raised again for the MSL (Modelica Standard Library)\footnote{MA project ``Libraries'', \url{https://doc.modelica.org}} without greater reception in 2008\footnote{MSL issue \#115, \url{https://github.com/modelica/ModelicaStandardLibrary/issues/115}}. Therein it was mentioned, that with the current concept of implementing the data access by the Modelica external function interface, the library vendors and users are responsible to instrument the Modelica code to consider parameterization (described as \emph{pull}-principle). However, with a \emph{push}-principle this responsibility could be moved to the tool vendors, and as such library users could benefit from a greater reusability and flexibility of the layered parameterization.
 
@@ -118,7 +118,7 @@ With no standardized interface available, Modelica users depending on external d
 
 The parameterization of Modelica models can be differentiated by the following usage scenarios.
 \begin{itemize}
- \item Property parameters are constant during a transient simulation. They are non-structural parameters, i.e., a translated simulation model can be reused with changed parameters. Examples are geometry dimensions (e.g., tire diameter), material constants (e.g., electrical resistance) or ambient conditions (e.g., ambient pressure or gravitational acceleration). They can be of \modelica{Integer}, \modelica{Boolean}, \modelica{Real} or \modelica{String} type and either be scalar or of one/two-dimensional array kind (e.g., consumption map or road excitation map).
+ \item Property parameters are constant during a transient simulation. They are non-structural parameters, i.e., a translated simulation model can be reused with changed parameters. Examples are geometry dimensions (e.g., tire diameter), material constants (e.g., electrical resistance) or ambient conditions (e.g., ambient pressure or gravitational acceleration). They can be of \modelica{Real}, \modelica{Integer}, \modelica{Boolean} or \modelica{String} type and either be scalar or of one/two-dimensional array kind (e.g., consumption map or road excitation map).
  \item Stimulation parameters can be considered as time-driven inputs for a transient simulation and can be modeled by one-dimensional look-up tables. Examples are the environmental conditions such as weather.
  \item Structural parameters have influence on the overall system topology and thus on the dimension of the system of equations. They need to be constant during a transient simulation, but any change requires a new translation of the Modelica model. Special care needs to be taken if structural parameters are read from external data resources.
 \end{itemize}
@@ -220,13 +220,13 @@ parameter Real p = dataSource.f("id");
 
 With such a sophisticated library design the actual implementation (as external object) is disguised from the caller as the handle of the external object no longer needs to be passed by the member accessor functions, and hence could be made a protected component.
 
-However, as of MLS 3.5 (Modelica Language Specification), it is not yet fully specified, if external objects may be used in records\footnote{MLS issue \#2399, \url{https://github.com/modelica/ModelicaSpecification/issues/2399}}.
+As of MLS 3.5 (Modelica Language Specification)\footnote{MA project ``Libraries'', \url{https://specification.modelica.org/}}, it is not yet fully specified, if external objects may be used in records\footnote{MLS issue \#2399, \url{https://github.com/modelica/ModelicaSpecification/issues/2399}}.
 
 \subsubsection{External Functions}\label{sec:functions}
 
 The actual external functions and objects serving the Modelica external function interface are implemented in C, i.e. no \C++ is utilized.
 
-Independent of the actual file type, the accessor functions for Real, Integer, Boolean or String scalars are \modelica{getReal}, \modelica{getInteger}, \modelica{getBoolean} or \modelica{getString}, respectively.
+Independent of the actual file type, the accessor functions for \modelica{Real}, \modelica{Integer}, \modelica{Boolean} or \modelica{String} scalars are \modelica{getReal}, \modelica{getInteger}, \modelica{getBoolean} or \modelica{getString}, respectively.
 For one/two-dimensional arrays, the accessor functions are appended by \modelica{Array1D}/\modelica{Array2D}, e.g., \modelica{getRealArray1D} or \modelica{getIntegerArray2D}.
 There also are the corresponding functions to retrieve the array dimensions from the external data resource, i.e., \modelica{getArraySize1D} and \modelica{getArraySize2D} (and also \modelica{getArrayRows2D} and \modelica{getArrayColumns2D}).
 
@@ -336,14 +336,14 @@ An example file with three different values is given by~\autoref{lst:json-exampl
 
 \subsubsection*{MATLAB MAT (including HDF)}
 
-MATLAB MAT files are binary files that can be used scalars, vectors or matrices.
+MATLAB MAT files are binary files that can be used for scalars, vectors or matrices.
 Nested structures are possible and can be accessed by \modelica{ExternData} using dot notation.
 MATLAB MAT of version~7.3 are HDF5 files and can be considered as a dedicated HDF5 data container.
 
 \subsubsection*{SSV}
 
 SSV files are standardized XML files that are used within the context of SSP to connect and parameterize FMUs.
-They can not only be used to parameterize imported FMUs in the Modelica simulation environment.
+Certainly, they can not only be used to parameterize imported FMUs in the Modelica simulation environment.
 One SSV file describes exactly one parameter set where (as of version~1.0) only scalar parameter values are supported.
 \autoref{lst:ssv-example} displays an example SSV file.
 
@@ -423,17 +423,17 @@ Similar as with CSV, tables can be read from JSON files and be utilized as stimu
 \section{Conclusions and Outlook}
 
 The open-source libraries \modelica{ExternData} and \modelica{ModelicaTableAdditions} are an offer to Modelica library developers and users to efficiently parameterize Modelica application models.
-Its right to exist is due a missing layered (Modelica Association) standard for the parameterization of Modelica models.
-As already mentioned by~\modelica{DataRetrieval}, the benefits of such a standardization are the cutback of library code towards the Modelica tools to even further increase the efficiency, convenience and usability.
+Its right to exist is due a missing layered (MA) standard for the parameterization of Modelica models.
+As already mentioned by~\textcite{modelica2005Ford}, the benefits of such a standardization are the cutback of library code towards the Modelica tools to even further increase the efficiency, convenience and usability of the parameterization of application models.
 
 There is no support for units so far, i.e., unit conversion is left to the application.
 This could be also addressed by a standardized parameterization.
 
 Library-wise, one future idea is the support of (symmetrical of asymmetrical) encrypted external resources, which is not yet covered by the MLS.
-In such cases the external functions need the appropriate (private) key to decrypt the external resources at simulation time in memory.
+In such cases the external functions require the appropriate (private) key to decrypt the external resources at simulation run-time in memory.
 Again, encryption as an isolated application can only be considered a short-term solution towards a future standard.
 
-Furthermore, it might be desirable if the mentioned open issues on the Modelica Language Specification regarding external objects could be clarified finally.
+Furthermore, it might be desirable if the mentioned open issues on the MLS regarding external objects could be clarified finally.
 
 \section*{Acknowledgements}
 
