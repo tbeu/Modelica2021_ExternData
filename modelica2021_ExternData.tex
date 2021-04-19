@@ -88,7 +88,7 @@
 
 \maketitle\thispagestyle{empty} %% <-- you need this for the first page
 \abstract{%
-This article explicates the different approaches and use cases for efficient parameterization of Modelica models by means of external data resources.
+This article presents the different approaches and use cases for efficient parameterization of Modelica models by means of external data resources.
 The main motivation is to improve the overall quality, testability and reusability of Modelica application models (both on component and system level) by a separation of the behavioral implementation from its actual design parameters.
 The Modelica libraries \modelica{ExternData} and \modelica{ModelicaTableAdditions} are freely available to support library developers and vendors in their ambitions to offer clean and dedicated interfaces for the parameterization of the application models and to benefit from a large variability of commonly used file types, such as CSV, Excel, HDF, JSON, MATLAB MAT, XML or even domain-specific file types such as for tire properties or weather data.
 }
@@ -123,13 +123,13 @@ The parameterization of Modelica models can be differentiated by the following u
  \item Structural parameters have influence on the overall system topology and thus on the dimension of the system of equations. They need to be constant during a transient simulation, but any change requires a new translation of the Modelica model. Special care needs to be taken if structural parameters are read from external data resources.
 \end{itemize}
 
-The Modelica libraries \modelica{ExternData}\footnote{ExternData Git repository, \url{https://github.com/modelica-3rdparty/ExternData}} and \modelica{ModelicaTableAdditions}\footnote{ModelicaTableAdditions Git repository, \url{https://github.com/tbeu/ModelicaTableAdditions}} are available as open-source Modelica packages under the permissive BSD-2-Clause License.
+The Modelica libraries \modelica{ExternData}\footnote{ExternData Git repository, \url{https://github.com/modelica-3rdparty/ExternData}} and \modelica{ModelicaTableAdditions}\footnote{ModelicaTableAdditions Git repository, \url{https://github.com/modelica-3rdparty/ModelicaTableAdditions}} are available as open-source Modelica packages under the permissive BSD-2-Clause License.
 Both libraries can be directly obtained from GitHub or via the Modelica \modelica{impact} package manager~\cite{impact, Tiller2015WhereIG}.
 \begin{itemize}
  \item \modelica{ExternData} supports the user in reading properties or structural parameters from various file types of external data resources.
  Data access from CSV (Comma Separated Values), INI, JSON (JavaScript Object Notation), MATLAB MAT (including HDF), SSV (System Structure Parameter Values), TIR (Tire Properties), Excel XLS/XLSX and XML files is implemented.
  \item \modelica{ModelicaTableAdditions} is an extension of the Modelica Standard Tables~\cite{modelica2014tables} with support for more file types beside Dymola MOS\footnote{There is no specific name or file extension for the Dymola-specific text/script files starting with ``\#1'' as first line.} and MATLAB MAT.
- Its blocks can be utilized to also model stimulation parameterization or look-up tables from CSV, EPW (EnergyPlus Weather)\footnote{EnergyPlus Weather Data, \url{https://energyplus.net/weather}} or JSON files and work as a replacement of the Modelica Standard Tables of the MSL.
+ Its blocks can be utilized to also model stimulation parameterization or look-up tables from CSV, EPW (EnergyPlus Weather)\footnote{EnergyPlus Weather Data, \url{https://energyplus.net/weather}} or JSON files and work as a replacement for the Modelica Standard Tables of the MSL.
 \end{itemize}
 
 \section{ExternData}
@@ -152,7 +152,7 @@ The library (as shown in Figure~\ref{fig:ExternData}) consists of top-level data
 
 The data source records are convenience types to encapsulate the external object component with its accessor functions.
 
-\begin{lstlisting}[caption=Naive record type definition, label=lst:naive-record-type-definition, language=modelica]
+\begin{lstlisting}[caption=Na\"ive record type definition, label=lst:naive-record-type-definition, language=modelica]
 // Library
 record DataSource "Data source record"
   parameter String fileName = ""
@@ -174,10 +174,10 @@ parameter Real p = dataSource.f(
   dataSource.obj, "id");
 \end{lstlisting}
 
-A naive record type definition together with an exemplary user call (application model) is given in~\autoref{lst:naive-record-type-definition}.
+A na\"ive record type definition together with an exemplary user call (application model) is given in~\autoref{lst:naive-record-type-definition}.
 (For the sake of clarity, the declaration of the external type \modelica{Types.ExtObj} and the external function annotation for \modelica{ExtFun} are skipped.)
 
-The disadvantage of such a naive approach is that the handle of the external object, i.e. \modelica{dataSource.obj}, has to be passed by every call of the accessor functions though it actually is an implementation detail of the record and should be a protected component.
+The disadvantage of such a na\"ive approach is that the handle of the external object, i.e. \modelica{dataSource.obj}, has to be passed by every call of the accessor functions though it actually is an implementation detail of the record and should be a protected component.
 A more sophisticated library design is based on clean interfaces for the records and accessor functions enabling inheritance, and thus the possibility of function redeclaration~\cite{modelisax2018hints}.
 The general concept is presented in~\autoref{lst:soph-record-type-definition}.
 
