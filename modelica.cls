@@ -42,11 +42,13 @@
 \fi
 
 % Load packages as done in the example
+\RequirePackage[main=english]{babel} %% we use English for the conference
 \RequirePackage{graphicx}      %% use graphics
 \RequirePackage[T1]{fontenc}   %% get hyphenation and accented letters right
 \RequirePackage{mathptmx}      %% use fitting times fonts also in formulas
 \RequirePackage{amsmath}       %% get support for pretty math formulas
 \RequirePackage{courier}       %% For proper courier fonts in texttt
+\RequirePackage{csquotes}      %% for language correct quotes since we use Babel
 % do not change these lines:
 \pagestyle{empty}                %% no page numbers!
 
@@ -101,7 +103,8 @@
                   dashed=false,
                   dateabbrev=false,
                   urldate=iso,
-                  date=iso]
+                  date=iso,
+                  seconds=true]
                   {biblatex}[2018/03/04 v3.11 programmable bibliographies (PK/MW)]
   \let\cite\parencite   %% normal \cite produces \parencite
   \let\modelica@printbibliography\printbibliography
@@ -126,5 +129,5 @@
 \lstset{language = modelica,
        basicstyle=\fontsize{9pt}{10.5pt}\ttfamily,
        backgroundcolor = \color{white}}
-\RequirePackage{numprint}
+\RequirePackage[autolanguage]{numprint}
 \npthousandsep{\,}
