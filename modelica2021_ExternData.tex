@@ -72,7 +72,8 @@
 \spacefactor1000 }
 
 \newcommand{\clang}[1]{\lstinline[language=c]|#1|}
-\newcommand{\modelica}[1]{\lstinline[language=modelica]|#1|}
+% \newcommand{\modelica}[1]{\lstinline[language=modelica]|#1|}
+\newcommand{\modelica}[1]{\code{#1}}
 
 \crefformat{footnote}{#2\footnotemark[#1]#3}
 
@@ -226,13 +227,13 @@ As of MLS 3.5 (Modelica Language Specification)\footnote{MA project ``Libraries'
 
 The actual external functions and objects serving the Modelica external function interface are implemented in C, i.e. no \C++ is utilized.
 
-Independent of the actual file type, the accessor functions for \modelica{Real}, \modelica{Integer}, \modelica{Boolean} or \modelica{String} scalars are \modelica{getReal}, \modelica{getInteger}, \modelica{getBoolean} or \modelica{getString}, respectively.
+Independent of the actual file type, the accessor functions for scalars of type \modelica{Real}, \modelica{Integer}, \modelica{Boolean} or \modelica{String} are named \modelica{getReal}, \modelica{getInteger}, \modelica{getBoolean} or \modelica{getString}, respectively.
 For one/two-dimensional arrays, the accessor functions are appended by \modelica{Array1D}/\modelica{Array2D}, e.g., \modelica{getRealArray1D} or \modelica{getIntegerArray2D}.
 There also are the corresponding functions to retrieve the array dimensions from the external data resource, i.e., \modelica{getArraySize1D} and \modelica{getArraySize2D} (and also \modelica{getArrayRows2D} and \modelica{getArrayColumns2D}).
 
 \subsubsection{Structural Parameters}
 
-Reading structural parameters using the \modelica{getArraySize1D}/\modelica{getArraySize2D} functions from external data resources (as shown for an XML file by~\autoref{lst:struct-params}) is not generally supported\footnote{MLS issue \#2425, \url{https://github.com/modelica/ModelicaSpecification/issues/2425}}.
+Reading structural parameters from external data resources (as shown for an XML file by~\autoref{lst:struct-params}) by functions \modelica{getArraySize1D} or \modelica{getArraySize2D} is not generally supported\footnote{MLS issue \#2425, \url{https://github.com/modelica/ModelicaSpecification/issues/2425}}.
 Of the tested Modelica tools, it only works in SimulationX.
 
 \begin{lstlisting}[caption=Accessing structural parameters in SimulationX, label=lst:struct-params, language=modelica]
