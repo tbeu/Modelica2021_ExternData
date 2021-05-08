@@ -292,7 +292,7 @@ This way, the reaction on missing data can be modeled per function call.
 
 \modelica{ExternData} supports various file types for different kind of requirements.
 
-\subsubsection*{CSV}
+\subsubsection{CSV}
 
 CSV files contain exactly one data set that is suitable for one/two-dimensional look-up tables.
 An example file with three columns is given by~\autoref{lst:csv-example}.
@@ -305,7 +305,7 @@ x,y,z
 1,2,3
 \end{lstlisting}
 
-\subsubsection*{INI}
+\subsubsection{INI}
 
 INI files contain scalar properties as key-value-pairs which are grouped by sections.
 The INI-keys can be fully qualified Modelica names using the dot notation.
@@ -318,7 +318,7 @@ gain.k = 1
 gain.k = 2
 \end{lstlisting}
 
-\subsubsection*{JSON}
+\subsubsection{JSON}
 
 JSON files can be used to define scalars, vectors or matrices which can be arbitrarily structured.
 The JSON-keys must not contain the dot character to properly work with the accessor functions of \modelica{ExternData}.
@@ -336,13 +336,13 @@ An example file with three different values is given by~\autoref{lst:json-exampl
 }
 \end{lstlisting}
 
-\subsubsection*{MATLAB MAT (including HDF)}
+\subsubsection{MATLAB MAT (including HDF)}
 
 MATLAB MAT files are binary files that can be used for scalars, vectors or matrices.
 Nested structures are possible and can be accessed by \modelica{ExternData} using dot notation.
 MATLAB MAT of version~7.3 are HDF5 files and can be considered as a dedicated HDF5 data container.
 
-\subsubsection*{SSV}
+\subsubsection{SSV}
 
 SSV files are standardized XML files that are used within the context of SSP to connect and parameterize FMUs.
 Certainly, they can not only be used to parameterize imported FMUs in the Modelica simulation environment.
@@ -364,16 +364,16 @@ One SSV file describes exactly one parameter set where (as of version~1.0) only 
 
 Technically, the external object \modelica{ExternData.Types.ExternXML2File} is reused while the SSV accessor functions call the appropriate XML2 functions (\modelica{ExternData.Functions.XML2.*}) with dedicated XPath query expressions.
 
-\subsubsection*{TIR}
+\subsubsection{TIR}
 
 TIR files define domain-specific tire properties.
 They are similar to INI files and are implemented to share the same external object \modelica{ExternData.Types.ExternINIFile} with respective format permissions.
 
-\subsubsection*{Excel XLS/XLSX}
+\subsubsection{Excel XLS/XLSX}
 
 Both legacy XLS and Office Open XML based XLSX Excel files are supported for parameterization of scalars or matrices.
 
-\subsubsection*{XML}
+\subsubsection{XML}
 
 There are two implementations available.
 \begin{enumerate}
