@@ -178,7 +178,7 @@ parameter Real p = dataSource.get(
 A na\"ive record type definition together with an exemplary user call (application model) is given in~\autoref{lst:naive-record-type-definition}.
 (For the sake of clarity, the declaration of the external type \modelica{Types.ExtObj} and the external function annotation for \modelica{ExtFun} are skipped.)
 
-The disadvantage of such a na\"ive approach is that the handle of the external object, i.e. \modelica{dataSource.obj}, has to be passed by every call of the accessor functions despite it actually is an implementation detail of the record and should be a protected component.
+The disadvantage of such a na\"ive approach is that the handle of the external object, i.e. \modelica{dataSource.obj}, has to be passed by every call of the accessor functions despite it actually is an implementation detail of the record and could be a protected component\footnote{Only public sections are allowed for records, though.}.
 A more sophisticated library design is based on clean interfaces for the records and accessor functions enabling inheritance, and thus the possibility of function redeclaration~\cite{modelisax2018hints}.
 The general concept is presented in~\autoref{lst:soph-record-type-definition}.
 
@@ -220,7 +220,7 @@ parameter DataSource dataSource(
 parameter Real p = dataSource.get("id");
 \end{lstlisting}
 
-With such a sophisticated library design the actual implementation (as an external object) is disguised from the caller as the handle of the external object no longer needs to be passed by the member accessor functions, and hence could be made a protected component.
+With such a sophisticated library design the actual implementation (as an external object) is disguised from the caller as the handle of the external object no longer needs to be passed by the member accessor functions.
 
 As of MLS 3.5 (Modelica Language Specification)\footnote{MA project ``Libraries'', \url{https://specification.modelica.org/}}, it is not yet fully specified, if external objects may be used in records\footnote{MLS issue \#2399, \url{https://github.com/modelica/ModelicaSpecification/issues/2399}}.
 
