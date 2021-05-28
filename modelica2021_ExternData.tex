@@ -259,7 +259,7 @@ This comes with the disadvantage of redundant file I/O and is demonstrated by~\a
 // Dymola application model
 parameter String s = "vector"
   "XML element name";
-parameter XMLFile dataSource(
+parameter ExternData.XMLFile dataSource(
   fileName="dataSource.xml")
   "Data source record";
 parameter Integer m =
