@@ -128,10 +128,12 @@ The Modelica libraries \modelica{ExternData}\footnote{ExternData Git repository,
 Both libraries can be directly obtained from GitHub or via the Modelica \modelica{impact} package manager~\cite{impact, Tiller2015WhereIG}.
 \begin{itemize}
  \item \modelica{ExternData} supports the user in reading properties or structural parameters from various file types of external data resources.
- Data access from CSV (Comma Separated Values), INI, JSON (JavaScript Object Notation), MATLAB MAT (including HDF), SSV (System Structure Parameter Values), TIR (Tire Properties), Excel XLS/XLSX and XML files is implemented.
- \item \modelica{ModelicaTableAdditions} is an extension of the Modelica Standard Tables~\cite{modelica2014tables} with support for more file types beside Dymola MOS\footnote{There is no specific name or file extension for the Dymola-specific text/script files starting with ``\#1'' as first line.} and MATLAB MAT.
+ Data access from CSV (Comma Separated Values), INI, JSON (JavaScript Object Notation), MATLAB~MAT (including HDF), SSV (System Structure Parameter Values), TIR (Tire Properties), Excel~XLS/XLSX and XML files is implemented.
+ \item \modelica{ModelicaTableAdditions} is an extension of the Modelica Standard Tables~\cite{modelica2014tables} with support for more file types beside Dymola~MOS\footnote{There is no specific name or file extension for the Dymola-specific text/script files starting with ``\#1'' as first line.} and MATLAB MAT.
  Its blocks can be utilized to also model stimulation parameterization or look-up tables from CSV, EPW (EnergyPlus Weather)\footnote{EnergyPlus Weather Data, \url{https://energyplus.net/weather}} or JSON files and work as a drop-in replacement for the Modelica Standard Tables of the MSL.
 \end{itemize}
+
+There exists the use case to reuse the time series stored in the result data of one simulation as stimulation parameterization for subsequent simulations. Whereas \textcite{MTSF} designed an HDF based file format, \textcite{Tiller2014reconW} invented two new file formats for efficient read and write operations while particularly avoiding the HDF dependency. Both proposals only gained experimental acceptance within the Modelica Association. As there also was no adoption in the Modelica tool environment, the workaround is to store the simulation result data as CSV file, which then can be read again by the table blocks of \modelica{ModelicaTableAdditions}.
 
 \section{ExternData}
 
@@ -152,6 +154,9 @@ The library (as shown in Figure~\ref{fig:ExternData}) consists of top-level data
 \subsubsection{Data Source Records}
 
 The data source records are convenience types to encapsulate the external object component with its accessor functions.
+
+A na\"ive record type definition together with an exemplary user call (application model) is given in~\autoref{lst:naive-record-type-definition}.
+(For the sake of clarity, the declaration of the external type \modelica{Types.ExtObj} and the external function annotation for \modelica{ExtFun} are skipped.)
 
 \begin{lstlisting}[caption=Na\"ive record type definition, label=lst:naive-record-type-definition, language=modelica]
 // Library
@@ -175,12 +180,7 @@ parameter Real p = dataSource.get(
   dataSource.obj, "id");
 \end{lstlisting}
 
-A na\"ive record type definition together with an exemplary user call (application model) is given in~\autoref{lst:naive-record-type-definition}.
-(For the sake of clarity, the declaration of the external type \modelica{Types.ExtObj} and the external function annotation for \modelica{ExtFun} are skipped.)
-
 The disadvantage of such a na\"ive approach is that the handle of the external object, i.e. \modelica{dataSource.obj}, has to be passed by every call of the accessor functions despite it actually is an implementation detail of the record and could be a protected component\footnote{Only public sections are allowed for records, though.}.
-A more sophisticated library design is based on clean interfaces for the records and accessor functions enabling inheritance, and thus the possibility of function redeclaration~\cite{modelisax2018hints}.
-The general concept is presented in~\autoref{lst:soph-record-type-definition}.
 
 \begin{lstlisting}[caption=Sophisticated record type definition, label=lst:soph-record-type-definition, language=modelica]
 // Library
@@ -219,6 +219,9 @@ parameter DataSource dataSource(
   fileName="dataSource.ext");
 parameter Real p = dataSource.get("id");
 \end{lstlisting}
+
+A more sophisticated library design is based on clean interfaces for the records and accessor functions enabling inheritance, and thus the possibility of function redeclaration~\cite{modelisax2018hints}.
+The general concept is presented in~\autoref{lst:soph-record-type-definition}.
 
 With such a sophisticated library design the actual implementation (as an external object) is disguised from the caller as the handle of the external object no longer needs to be passed by the member accessor functions.
 
@@ -294,9 +297,9 @@ This way, the reaction on missing data can be modeled per function call.
 
 \subsubsection{CSV}
 
-CSV files contain exactly one data set that is suitable for one/two-dimensional look-up tables.
-An example file with three columns is given by~\autoref{lst:csv-example}.
-Both the number of header lines and the column delimiter character can be specified.
+CSV files contain exactly one data set that can be considered as matrix.
+An example file with three columns and a header line is given by~\autoref{lst:csv-example}.
+Both the number of header lines to be ignored and the column delimiter character can be specified.
 
 \begin{lstlisting}[caption=Example CSV file, label=lst:csv-example]
 x,y,z
@@ -339,8 +342,10 @@ An example file with three different values is given by~\autoref{lst:json-exampl
 \subsubsection{MATLAB MAT (including HDF)}
 
 MATLAB MAT files are binary files that can be used for scalars, vectors or matrices.
-Nested structures are possible and can be accessed by \modelica{ExternData} using dot notation.
-MATLAB MAT of version~7.3 are HDF5 files and can be considered as a dedicated HDF5 data container.
+Though it is a proprietary file format it is a common data exchange format for various scientific applications. 
+MATLAB MAT of version~7.3 are HDF5 files and can be considered as a dedicated HDF5 data container. This format version is especially recommended for huge data volumes.
+However, it is not advisable to read huge arrays as Modelica variables.
+\modelica{ExternData} supports the access of nested structures using dot notation.
 
 \subsubsection{SSV}
 
@@ -386,7 +391,9 @@ There is no restriction on the underlying XML schema, i.e. it can be used for ar
 \section{ModelicaTableAdditions}
 
 The Modelica library \modelica{ModelicaTableAdditions} developed out of the need to offer reading of external data sources for stimulation parameters (e.g., look-up tables) from commonly used text file formats.
-The Dymola MOS file format, which is the only text file format supported by the Modelica Standard Tables is not suitable for exchange between different applications.
+Therefore, the blocks of \modelica{ModelicaTableAdditions} extend the Modelica Standard Tables of the MSL by support for additional file formats.
+It does not add other features like N-dimensional arrays, scattered data or spline approximation (as for example by \textcite{ApproxSpline}).
+The Dymola~MOS file format, which is the only text file format supported by the Modelica Standard Tables is not suitable for exchange between different applications.
 This is where CSV and JSON have their advantages, which can easily be processed by different applications.
 As with the Modelica Standard Tables, the external functions are implemented in pure C (i.e., no \C++).
 For JSON, the same library dependencies are utilized as with \modelica{ExternData}.
@@ -409,7 +416,8 @@ The library (as shown in Figure~\ref{fig:ModelicaTableAdditions}) consists of th
 \subsubsection{CSV}
 
 The table of a CSV file (as shown by~\autoref{lst:csv-example}) can be used for time-driven simulation or one/two-dimensional look-up tables.
-Both the number of header lines and the column delimiter character can be specified.
+Both the number of header lines to be ignored and the column delimiter character can be specified.
+Addressing certain columns by their names in the header is not (yet) supported.
 
 \subsubsection{EPW}
 
