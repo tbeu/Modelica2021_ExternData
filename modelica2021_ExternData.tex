@@ -133,7 +133,7 @@ Both libraries can be directly obtained from GitHub or via the Modelica \modelic
  Its blocks can be utilized to also model stimulation parameterization or look-up tables from CSV, EPW (EnergyPlus Weather)\footnote{EnergyPlus Weather Data, \url{https://energyplus.net/weather}} or JSON files and work as a drop-in replacement for the Modelica Standard Tables of the MSL.
 \end{itemize}
 
-There exists the use case to reuse the time series stored in the result data of one simulation as stimulation parameterization for subsequent simulations. Whereas \textcite{MTSF} designed an HDF based file format, \textcite{Tiller2014reconW} invented two new file formats for efficient read and write operations while particularly avoiding the HDF dependency. Both proposals only gained experimental acceptance within the Modelica Association. As there also was no adoption in the Modelica tool environment, the workaround is to store the simulation result data as CSV file, which then can be read again by the table blocks of \modelica{ModelicaTableAdditions}.
+There exists the use case to reuse the time series stored in the result data of one simulation as stimulation parameterization for subsequent simulations. Whereas \textcite{MTSF} designed an HDF based file format, \textcite{Tiller2014reconW} invented two new file formats for efficient read and write operations while particularly avoiding the HDF dependency. Both proposals only gained experimental acceptance within the MA. As there also was no adoption in the Modelica tool environment, the workaround is to store the simulation result data as CSV file, which then can be read again by the table blocks of \modelica{ModelicaTableAdditions}.
 
 \section{ExternData}
 
