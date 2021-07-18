@@ -133,7 +133,7 @@ Both libraries can be directly obtained from GitHub or via the Modelica \modelic
  Its blocks can be utilized to also model stimulation parameterization or look-up tables from CSV, EPW (EnergyPlus Weather)\footnote{EnergyPlus Weather Data, \url{https://energyplus.net/weather}} or JSON files and work as a drop-in replacement for the Modelica Standard Tables of the MSL.
 \end{itemize}
 
-There exists the use case to reuse the time series stored in the result data of one simulation as stimulation parameterization for subsequent simulations. Whereas \textcite{MTSF} designed an HDF based file format, \textcite{Tiller2014reconW} invented two new file formats for efficient read and write operations while particularly avoiding the HDF dependency. Both proposals only gained experimental acceptance within the MA. As there also was no adoption in the Modelica tool environment, the workaround is to store the simulation result data as CSV file, which then can be read again by the table blocks of \modelica{ModelicaTableAdditions}.
+There exists the use case to reuse the time series stored in the result data of one simulation as stimulation parameterization for subsequent simulations. Whereas \textcite{MTSF} designed an HDF based file format, \textcite{Tiller2014reconW} invented two new file formats for efficient read and write operations while particularly avoiding the HDF dependency. Both proposals only gained experimental acceptance within the MA. As there also was no adoption in the Modelica tool environment, the workaround is to store the simulation result data as CSV file, which then can be read again by the one-dimensional look-up table blocks of \modelica{ModelicaTableAdditions}.
 
 \section{ExternData}
 
@@ -386,7 +386,7 @@ There are two implementations available.
  \item \modelica{ExternData.XML2File} enables full support of XPath query expressions to also query XML attributes or more complicated XML structures.
 \end{enumerate}
 
-There is no restriction on the underlying XML schema, i.e. it can be used for arbitrarily structured XML data, being standardized (e.g., SSV or CPACS (Common Parametric Aircraft Configuration Schema)\footnote{CPACS, \url{https://cpacs.de}}) or not.
+There is no restriction on the underlying XML schema, i.e. it can be used for arbitrarily structured XML data, being standardized (e.g., SSV or CPACS (Common Parametric Aircraft Configuration Schema)\footnote{CPACS, \url{https://cpacs.de}}) or customized.
 
 \section{ModelicaTableAdditions}
 
@@ -402,7 +402,7 @@ The library has been successfully tested in Dymola and OpenModelica (Linux only)
 
 \subsection{Library Design}
 
-The library (as shown in Figure~\ref{fig:ModelicaTableAdditions}) consists of the five combi-table blocks known from the MSL, but this time within the \modelica{ModelicaTableAdditions} name-space.
+The library (as shown in Figure~\ref{fig:ModelicaTableAdditions}) consists of the five look-up table blocks known from the MSL, but this time within the \modelica{ModelicaTableAdditions} name-space.
 
 \begin{figure}[!ht]
 \centering
@@ -417,14 +417,17 @@ The library (as shown in Figure~\ref{fig:ModelicaTableAdditions}) consists of th
 
 The table of a CSV file (as shown by~\autoref{lst:csv-example}) can be used for time-driven simulation or one/two-dimensional look-up tables.
 Both the number of header lines to be ignored and the column delimiter character can be specified.
-Addressing certain columns by their names in the header is not (yet) supported.
+Addressing certain columns by their names in the (optional) CSV header line is not supported.
+
+Support for CSV files was also ported to the Modelica Standard Tables and merged to the MSL master branch in early~2021\footnote{MSL issue \#3691, \url{https://github.com/modelica/ModelicaStandardLibrary/pull/3691}}.
 
 \subsubsection{EPW}
 
 The weather conditions of one year are the typical stimulation parameters for building energy simulations, such as the Modelica \modelica{Buildings} Library~\cite{buildings}.
 EnergyPlus provides weather data for simulation in various formats, especially their EPW format.
 Since this file format is not natively supported by the Modelica Standard Tables it manually needed to be pre-processed and converted to either Dymola~MOS or MATLAB MAT format.
-This pre-processing no longer is necessary as the EPW format is directly supported by all blocks of the \modelica{ModelicaTableAdditions} library.
+
+This pre-processing no longer is necessary as the EPW format is directly supported by all one-dimensional look-up table blocks of the \modelica{ModelicaTableAdditions} library.
 
 \subsubsection{JSON}
 
@@ -447,7 +450,7 @@ Furthermore, it might be desirable if the mentioned open issues on the MLS regar
 
 \section*{Acknowledgements}
 
-The authors would like to thank everybody who has contributed to the libraries \modelica{ExternData} and \modelica{ModelicaTableAdditions}, particularly, Hang Yu, Martin Sjölund, Mike Dempsey and Peter Harman.
+The authors would like to thank everybody who has contributed to the libraries \modelica{ExternData} and \modelica{ModelicaTableAdditions}, particularly, Adrian Pop, Hang Yu, Martin Sjölund, Mike Dempsey and Peter Harman.
 
 \printbibliography
 
